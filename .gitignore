@@ -73,3 +73,4 @@ node_modules/
 serviceAccountKey.json
 credentials.json
 token.json
+functions/yarn.lock

@@ -23,7 +23,7 @@ exports.subscribe = (req, res) => {
           .then(() => {
             return res.status(201).json({
               code: "subscriber/add",
-              message: "Subscriber added in databse successfully.",
+              message: "Subscriber added successfully.",
             });
           })
           .catch((err) => {
@@ -32,7 +32,7 @@ exports.subscribe = (req, res) => {
       } else {
         return res.json({
           code: "subscriber/repeat",
-          message: "This email already subscribed with us.",
+          message: "This email already subscribed.",
         });
       }
     })
