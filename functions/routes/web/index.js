@@ -1,6 +1,7 @@
 // Open Neta
-const { subscribe } = require("./subscribe");
+const { subscribe, emailPush } = require("./subscribe");
 
 module.exports = {
   subscribe,
+  emailPush
 };
