@@ -4,7 +4,7 @@ var serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://sochke-dev.firebaseio.com"
+  databaseURL: "https://sochke-web.firebaseio.com"
 });
 // admin.initializeApp(functions.config().firebase);
 

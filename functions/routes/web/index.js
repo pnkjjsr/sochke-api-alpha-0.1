@@ -1,9 +1,13 @@
 // Open APIs
 const { subscribe, emailPush } = require("./subscribe");
-const { promoted } = require("./minister");
+const { promoted, minister } = require("./minister");
 
 module.exports = {
+  // subscribe
   subscribe,
   emailPush,
-  promoted
+
+  // minister
+  promoted,
+  minister
 };

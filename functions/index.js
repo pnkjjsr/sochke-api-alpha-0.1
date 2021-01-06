@@ -11,8 +11,8 @@ main.use(app);
 app.use(checkIfAuthenticated);
 //** ======================================================== */
 
-exports.subscribe = functions.region("asia-east2").https.onRequest(main);
-exports.minister = functions.region("asia-east2").https.onRequest(main);
+exports.subscribe = functions.region("us-central1").https.onRequest(main);
+exports.minister = functions.region("us-central1").https.onRequest(main);
 
 // get, post, put, patch, delete
 const web = require("./routes/web");
@@ -21,3 +21,4 @@ app.post("/", web.subscribe);
 app.post("/email-push", web.emailPush);
 //** Minister Routes */
 app.get("/promoted", web.promoted);
+app.get("/:userName", web.minister);
