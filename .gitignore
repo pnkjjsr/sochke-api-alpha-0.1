@@ -75,3 +75,4 @@ credentials.json
 token.json
 functions/yarn.lock
 functions/package-lock.json
+yarn.lock
