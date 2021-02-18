@@ -5,8 +5,8 @@ exports.promoted = (req, res) => {
 
   let colRef = db.collection("ministers");
   colRef
-    .where("promoted", "==", true)
-    .orderBy("createdAt", "desc")
+    .where("promoted", ">", 0)
+    .orderBy("promoted", "asc")
     .limit(10)
     .get()
     .then((snapshot) => {
