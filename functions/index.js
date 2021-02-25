@@ -20,5 +20,11 @@ const web = require("./routes/web");
 app.post("/", web.subscribe);
 app.post("/email-push", web.emailPush);
 //** Minister Routes */
+app.get("/username/:userName", web.username);
 app.get("/promoted", web.promoted);
-app.get("/:userName", web.minister);
+app.get("/trending", web.trending);
+
+
+
+
+
