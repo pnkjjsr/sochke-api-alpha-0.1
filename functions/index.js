@@ -13,18 +13,18 @@ app.use(checkIfAuthenticated);
 
 exports.subscribe = functions.region("asia-south1").https.onRequest(main);
 exports.minister = functions.region("asia-south1").https.onRequest(main);
+exports.cron = functions.region("asia-south1").https.onRequest(main);
 
 // get, post, put, patch, delete
 const web = require("./routes/web");
 //** Subscriber Routes */ 
 app.post("/", web.subscribe);
 app.post("/email-push", web.emailPush);
+
 //** Minister Routes */
 app.get("/username/:userName", web.username);
 app.get("/promoted", web.promoted);
 app.get("/trending", web.trending);
 
-
-
-
-
+//** Cron Routes */
+app.put("/subscribers-push", web.subscribersPush);

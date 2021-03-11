@@ -40,7 +40,6 @@ exports.subscribe = (req, res) => {
     });
 };
 
-
 exports.emailPush = (req, res) => {
   require('dotenv').config();
   var Mailchimp = require('mailchimp-api-v3');
@@ -62,6 +61,84 @@ exports.emailPush = (req, res) => {
           message: "Subscriber added in mailchimp audience."
         });
       }
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+}
+
+exports.subscribersPush = (req, res) => {
+  const ChildProcess = require("child_process");
+  const SubscribersPushCron = ChildProcess.fork("./childProcess/subscribersPush.js");
+
+  const { db } = require("../../../utils/admin");
+  const { isEmail } = require("../../../utils/validation");
+
+  let error = null;
+  let emails = [];
+
+  let colUsers = db.collection("users");
+  let colSubscribers = db.collection("subscribers");
+
+  let transaction = db
+    .runTransaction((t) => {
+      return t
+        .get(colUsers, colSubscribers)
+        .then(() => {
+
+          let subscribers = colSubscribers
+            .where("email", "!=", "")
+            .get()
+            .then((snapshot) => {
+              if (snapshot.empty) return console.log("Subscribers data not loading.");
+
+              snapshot.forEach((doc) => {
+                let data = doc.data();
+
+                if (!isEmail(data.email)) {
+                  // @TODO: 8th March 2021 | email incorrect debugging
+                  return
+                }
+
+                emails.push(data.email);
+              });
+            })
+
+
+          let users = colUsers
+            .where("email", "!=", "")
+            .get()
+            .then((snapshot) => {
+              if (snapshot.empty) return console.log("Subscribers data not loading.");
+
+              snapshot.forEach((doc) => {
+                let data = doc.data();
+
+                if (!isEmail(data.email)) {
+                  // @TODO: 8th March 2021 | email incorrect debugging
+                  return
+                }
+
+                emails.push(data.email);
+              });
+            });
+
+          return Promise.all([subscribers, users])
+            .catch((err) => {
+              error = err;
+            });
+        })
+        .catch((err) => {
+          error = err;
+        });
+    })
+    .then(() => {
+      SubscribersPushCron.send(emails);
+
+      return res.status(200).send({
+        code: "subscribers-cron/running",
+        message: "Subscribers cron run successfully."
+      });
     })
     .catch((err) => {
       return res.status(400).json(err);
