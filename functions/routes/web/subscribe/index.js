@@ -68,79 +68,47 @@ exports.emailPush = (req, res) => {
 }
 
 exports.subscribersPush = (req, res) => {
+  var cron = require('node-cron');
   const ChildProcess = require("child_process");
   const SubscribersPushCron = ChildProcess.fork("./childProcess/subscribersPush.js");
 
   const { db } = require("../../../utils/admin");
   const { isEmail } = require("../../../utils/validation");
 
-  let error = null;
   let emails = [];
-
-  let colUsers = db.collection("users");
   let colSubscribers = db.collection("subscribers");
 
-  let transaction = db
-    .runTransaction((t) => {
-      return t
-        .get(colUsers, colSubscribers)
-        .then(() => {
+  let date = new Date();
+  let cronDate = date.toLocaleDateString('en-IN', { timeZone: "Asia/Calcutta" });
 
-          let subscribers = colSubscribers
-            .where("email", "!=", "")
-            .get()
-            .then((snapshot) => {
-              if (snapshot.empty) return console.log("Subscribers data not loading.");
+  cron.schedule('59 59 23 * * *', () => {
+    console.log(`Cron run today at: ${date}`);
 
-              snapshot.forEach((doc) => {
-                let data = doc.data();
+    colSubscribers.orderBy("createdAt", "desc").get().then((snapshot) => {
+      if (snapshot.empty) return console.log("Subscribers data not loading.");
 
-                if (!isEmail(data.email)) {
-                  // @TODO: 8th March 2021 | email incorrect debugging
-                  return
-                }
+      snapshot.forEach((doc) => {
+        let data = doc.data();
+        let createdAt = new Date(data.createdAt).toLocaleDateString('en-IN', { timeZone: "Asia/Calcutta" });
 
-                emails.push(data.email);
-              });
-            })
+        if (cronDate == createdAt) {
+          if (!isEmail(data.email)) {
+            // @TODO: 8th March 2021 | email incorrect debugging
+            return
+          }
 
-
-          let users = colUsers
-            .where("email", "!=", "")
-            .get()
-            .then((snapshot) => {
-              if (snapshot.empty) return console.log("Subscribers data not loading.");
-
-              snapshot.forEach((doc) => {
-                let data = doc.data();
-
-                if (!isEmail(data.email)) {
-                  // @TODO: 8th March 2021 | email incorrect debugging
-                  return
-                }
-
-                emails.push(data.email);
-              });
-            });
-
-          return Promise.all([subscribers, users])
-            .catch((err) => {
-              error = err;
-            });
-        })
-        .catch((err) => {
-          error = err;
-        });
-    })
-    .then(() => {
-      SubscribersPushCron.send(emails);
-
-      return res.status(200).send({
-        code: "subscribers-cron/running",
-        message: "Subscribers cron run successfully."
+          emails.push(data.email);
+        }
       });
-    })
-    .catch((err) => {
-      return res.status(400).json(err);
+
+      emails.length > 0 ? SubscribersPushCron.send(emails) : console.log(`No new subscribers today: ${cronDate}`);
+    }).catch((err) => {
+      return console.log(err);
     });
+  });
+
+  return res.status(200).send({
+    code: "subscribers-cron/running",
+    message: "Subscribers cron run successfully."
+  });
 }

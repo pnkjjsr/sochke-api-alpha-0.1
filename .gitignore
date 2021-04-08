@@ -5,13 +5,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 firebase-debug.log*
+firebase-debug.*.log*
 
 # Firebase cache
 .firebase/
-.firebaserc
-firebase.json
-
-
 
 # Firebase config
 
@@ -67,12 +64,9 @@ node_modules/
 
 # dotenv environment variables file
 .env
-
-
-# Config Files
-serviceAccountKey.json
-credentials.json
-token.json
+.firebaserc
+firebase.json
 functions/yarn.lock
-functions/package-lock.json
-yarn.lock
+functions/credentials.json
+functions/serviceAccountKey.json
+functions/token.json

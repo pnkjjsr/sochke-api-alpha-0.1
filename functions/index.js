@@ -17,6 +17,7 @@ exports.cron = functions.region("asia-south1").https.onRequest(main);
 
 // get, post, put, patch, delete
 const web = require("./routes/web");
+
 //** Subscriber Routes */ 
 app.post("/", web.subscribe);
 app.post("/email-push", web.emailPush);
