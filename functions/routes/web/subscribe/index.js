@@ -68,7 +68,6 @@ exports.emailPush = (req, res) => {
 }
 
 exports.subscribersPush = (req, res) => {
-  var cron = require('node-cron');
   const ChildProcess = require("child_process");
   const SubscribersPushCron = ChildProcess.fork("./childProcess/subscribersPush.js");
 
@@ -81,34 +80,31 @@ exports.subscribersPush = (req, res) => {
   let date = new Date();
   let cronDate = date.toLocaleDateString('en-IN', { timeZone: "Asia/Calcutta" });
 
-  cron.schedule('59 59 23 * * *', () => {
-    console.log(`Cron run today at: ${date}`);
+  console.log(`Cron run today at: ${date}`);
+  colSubscribers.orderBy("createdAt", "desc").get().then((snapshot) => {
+    if (snapshot.empty) return console.log("Subscribers data not loading.");
 
-    colSubscribers.orderBy("createdAt", "desc").get().then((snapshot) => {
-      if (snapshot.empty) return console.log("Subscribers data not loading.");
+    snapshot.forEach((doc) => {
+      let data = doc.data();
+      let createdAt = new Date(data.createdAt).toLocaleDateString('en-IN', { timeZone: "Asia/Calcutta" });
 
-      snapshot.forEach((doc) => {
-        let data = doc.data();
-        let createdAt = new Date(data.createdAt).toLocaleDateString('en-IN', { timeZone: "Asia/Calcutta" });
-
-        if (cronDate == createdAt) {
-          if (!isEmail(data.email)) {
-            // @TODO: 8th March 2021 | email incorrect debugging
-            return
-          }
-
-          emails.push(data.email);
+      if (cronDate == createdAt) {
+        if (!isEmail(data.email)) {
+          // @TODO: 8th March 2021 | email incorrect debugging
+          return
         }
-      });
 
-      emails.length > 0 ? SubscribersPushCron.send(emails) : console.log(`No new subscribers today: ${cronDate}`);
-    }).catch((err) => {
-      return console.log(err);
+        emails.push(data.email);
+      }
     });
+
+    emails.length > 0 ? SubscribersPushCron.send(emails) : console.log(`No new subscribers today: ${cronDate}`);
+  }).catch((err) => {
+    return console.log(err);
   });
 
-  return res.status(200).send({
-    code: "subscribers-cron/running",
-    message: "Subscribers cron run successfully."
-  });
+  // return res.status(200).send({
+  //   code: "subscribers-cron/running",
+  //   message: "Subscribers cron run successfully."
+  // });
 }

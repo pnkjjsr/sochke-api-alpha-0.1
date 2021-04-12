@@ -28,4 +28,10 @@ app.get("/promoted", web.promoted);
 app.get("/trending", web.trending);
 
 //** Cron Routes */
-app.put("/subscribers-push", web.subscribersPush);
+exports.subscribersPush = functions.region("asia-south1")
+    .pubsub.schedule('59 23 * * *')
+    .timeZone('Asia/Kolkata')
+    .onRun((context) => {
+        web.subscribersPush
+        return null;
+    });
