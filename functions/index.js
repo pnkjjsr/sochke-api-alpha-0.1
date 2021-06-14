@@ -26,6 +26,7 @@ app.post("/email-push", web.emailPush);
 app.get("/username/:userName", web.username);
 app.get("/promoted", web.promoted);
 app.get("/trending", web.trending);
+app.post("/addMinister", web.addMinister);
 
 //** Cron Routes */
 exports.subscribersPush = functions.region("asia-south1")

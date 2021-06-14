@@ -133,5 +133,62 @@ exports.trending = (req, res) => {
     });
 }
 
+exports.addMinister = (req, res) => {
+  const { db } = require("../../../utils/admin");
 
+  const data = {
+    address: req.body.address,
+    age: req.body.age,
+    assets: req.body.assets,
+    bannerUrl: req.body.bannerUrl,
+    cases: req.body.cases,
+    constituency: req.body.constituency,
+    createdAt: new Date().toISOString(),
+    education: req.body.education,
+    liabilities: req.body.liabilities,
+    name: req.body.name,
+    party: req.body.party,
+    partyLogo: req.body.partyLogo,
+    partyShort: req.body.partyShort,
+    photoUrl: req.body.photoUrl,
+    pincode: req.body.pincode,
+    promoted: req.body.promoted,
+    searchTags: req.body.searchTags,
+    state: req.body.state,
+    twitterHandle: req.body.twitterHandle,
+    type: req.body.type,
+    userName: req.body.userName,
+    winner: req.body.winner,
+    year: req.body.year,
+  };
 
+  let colRef = db.collection("ministers");
+
+  colRef.where("userName", "==", data.userName).get()
+    .then((snapshot) => {
+      if (!snapshot.empty) {
+        return res.status(400).json({
+          code: "minister/duplicate",
+          messsage: `${data.userName} already added in database`
+        });
+      }
+      else {
+        colRef.add(data).then((ref) => {
+          colRef.doc(ref.id).update({ id: ref.id })
+            .then(() => {
+              return res.status(200).json({
+                code: "minister/added",
+                message: "New minister added in database",
+              });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        });
+
+      }
+    })
+    .catch((err) => {
+      return res.status(400).json(err);
+    });
+}
